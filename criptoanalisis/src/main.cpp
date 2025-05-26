@@ -1,84 +1,37 @@
-#include <iostream>
-#include <string>
-#include "CesarEncryption.h"
-using namespace std;
+#include "Prerequisites.h"
+#include "XOREncoder.h"
 
-string cifrarCesar(const string& texto, int rotacion) {
-  string resultado = "";
-
-  for (char c : texto) {
-    if (c >= 'A' && c <= 'Z') {
-      resultado += (char)(((c - 'A' + rotacion) % 26) + 'A');
-    }
-    else if (c >= 'a' && c <= 'z') {
-      resultado += (char)(((c - 'a' + rotacion) % 26) + 'a');
-    }
-    else if (c >= '0' && c <= '9') {
-      resultado += (char)(((c - '0' + rotacion) % 10) + '0');
-    }
-    else {
-      resultado += c;
-    }
-  }
-
-  return resultado;
-}
-
-string descifrarCesar(const string& texto, int rotacion) {
-  return cifrarCesar(texto, 26 - (rotacion % 26));
-}
-
-void ataqueFuerzaBruta(const string& cifrado) {
-  cout << "\nIntentos de descifrado por fuerza bruta:\n";
-  for (int clave = 1; clave < 26; ++clave) {
-    string intento = cifrarCesar(cifrado, 26 - clave);
-    cout << "Clave " << clave << ": " << intento << endl;
-  }
-}
-
-int calcularClaveProbable(const string& texto) {
-  int frecuencias[26] = { 0 };
-
-  for (char c : texto) {
-    if (c >= 'a' && c <= 'z') {
-      frecuencias[c - 'a']++;
-    }
-    else if (c >= 'A' && c <= 'Z') {
-      frecuencias[c - 'A']++;
-    }
-  }
-
-  int indiceMax = 0;
-  for (int i = 1; i < 26; ++i) {
-    if (frecuencias[i] > frecuencias[indiceMax]) {
-      indiceMax = i;
-    }
-  }
-
-  int claveProbable = (indiceMax - ('e' - 'a') + 26) % 26;
-  return claveProbable;
-}
-
-
-// Cifrado: Fmirzirmhsw e pe gpewi hi wikyvmheh teve zmhisnyiksw. Ir iwxe qexivme, etvirhiver e gmjvev qirweniw c hiwgmjvev gshmksw sgypxsw
 int main() {
-  string mensaje = "Bienvenidos a la clase de seguridad para videojuegos. En esta materia, aprenderan a cifrar mensajes y descifrar codigos ocultos";
-  int rotacion = 4;
-  /*
+  XOREncoder XORencoder;
 
-  string cifrado = cifrarCesar(mensaje, rotacion);
+  std::string mensaje = "Hola Mundo";
+  std::string clave = "clave";
+  
+  std::cout << "Mensaje original: " << mensaje << std::endl;
 
-  string descifrado = descifrarCesar(cifrado, rotacion);
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::string cifrado = XORencoder.encode(mensaje, clave);
 
-  cout << "Posible Clave:" + std::to_string( calcularClaveProbable(cifrado)) << endl;
-  */
+  std::cout << "Texto cifrado (original): " << cifrado << std::endl;
+  std::string descifrado = XORencoder.encode(cifrado, clave);
 
-  CesarEncryption cesar;
-  string cifrado = cesar.encode(mensaje, rotacion);
-  cout << "Texto cifrado: " << cifrado << endl;
-  string descifrado = cesar.decode(cifrado, rotacion);
-  cout << "Texto descifrado: " << descifrado << endl;
-  //cesar.bruteForceAttack(cifrado);
-  cout << "Posible Clave:" + std::to_string( cesar.evaluatePossibleKey(cifrado)) << endl;
+
+  std::cout << "Texto cifrado (hex): "; 
+  XORencoder.printHex(cifrado);
+  std::cout << std::endl;
+
+  std::cout << "Mensaje descifrado: " << descifrado << std::endl;
+
+  std::vector<unsigned char> bytesCifrados(cifrado.begin(), cifrado.end());
+
+  std::cout << "\n--- Fuerza bruta (1 byte) con filtro ---\n";
+ // XORencoder.bruteForce_1Byte(bytesCifrados);
+
+  std::cout << "\n--- Fuerza bruta (2 bytes) con filtro ---\n";
+ // XORencoder.bruteForce_2Byte(bytesCifrados);
+
+  std::cout << "\n--- Fuerza bruta (diccionario de claves) ---\n";
+  XORencoder.bruteForceByDictionary(bytesCifrados);
   return 0;
 }
