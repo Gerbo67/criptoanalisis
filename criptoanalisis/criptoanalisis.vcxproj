@@ -134,9 +134,16 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\AsciiBinary.h" />
     <ClInclude Include="include\CesarEncryption.h" />
+    <ClInclude Include="include\EvaluationIA.h" />
+    <ClInclude Include="include\libraries\httplib.h" />
+    <ClInclude Include="include\libraries\json.hpp" />
     <ClInclude Include="include\Prerequisites.h" />
     <ClInclude Include="include\XOREncoder.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="dictionaries\clavesXOR.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

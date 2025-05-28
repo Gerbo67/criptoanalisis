@@ -1,0 +1,5 @@
+﻿uvicorn[standard]==0.29.0
+transformers==4.51.3
+torch==2.7.0
+fastapi~=0.111.0
+pydantic~=2.11.4
