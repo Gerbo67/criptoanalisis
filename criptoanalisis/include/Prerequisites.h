@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
+#include <bitset>
 
 // Call API
 #include "libraries/httplib.h"

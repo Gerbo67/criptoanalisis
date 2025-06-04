@@ -17,7 +17,7 @@ useAscii() {
 
     std::string text_from_binary = AB.binaryToString(binary_output);
     std::cout << "Convertido a texto: " << text_from_binary << std::endl;
-    
+
     std::cout << "\n--- FIN DE LA DEMOSTRACIÓN ---" << std::endl;
 }
 
@@ -81,6 +81,11 @@ useCesar(bool local) {
             << std::endl;
         std::cout << "***********************************\n";
     }
+}
+
+void
+useDes() {
+
 }
 
 int

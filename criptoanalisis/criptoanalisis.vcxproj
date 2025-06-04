@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="include\AsciiBinary.h" />
     <ClInclude Include="include\CesarEncryption.h" />
+    <ClInclude Include="include\DES.h" />
     <ClInclude Include="include\EvaluationIA.h" />
     <ClInclude Include="include\libraries\httplib.h" />
     <ClInclude Include="include\libraries\json.hpp" />
