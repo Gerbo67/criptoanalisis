@@ -2,12 +2,21 @@
 #include "Prerequisites.h"
 
 class
-DES {
+    DES {
 public:
     DES() = default;
-    DES(const std::bitset<64>& key);
+    DES(const std::bitset<64>& key) : key(key) {
+        generateSubkeys();
+    }
 
     ~DES() = default;
+
+    void generateSubkeys() {
+        for (int i = 0; i < 16; ++i) {
+            std::bitset<48> subkey((key.to_ullong() >> 1) & 0xFFFFFFFFFFFF);
+            subkeys.push_back(subkey);
+        }
+    }
 
     std::bitset<64>
     iPermutation(const std::bitset<64>& input) {
@@ -18,12 +27,73 @@ public:
         return output;
     }
 
-    std::bitset<64> encode(const std::bitset<64>& plaintext) {
+    std::bitset<48>
+    expand(const std::bitset<32>& halfBlock) {
+        std::bitset<48> output;
+        for (int i = 0; i < 48; i++) {
+            output[i] = halfBlock[32 - EXPANSION_TABLE[i]];
+        }
+        return output;
+    }
+
+    std::bitset<32>
+    substitute(const std::bitset<48>& input) {
+        std::bitset<32> output;
+        for (int i = 0; i < 8; i++) {
+            int row = (input[i * 6] << 1) | input[i * 6 + 5];
+            int col = (input[i * 6 + 1] << 3) | (input[i * 6 + 2] << 2) |
+                (input[i * 6 + 3] << 1) | input[i * 6 + 4];
+            int sbox_value = SBOX[row % 4][col % 16];
+
+            for (int j = 0; j < 4; j++) {
+                output[i * 4 + j] = (sbox_value >> (3 - j)) & 1;
+            }
+        }
+        return output;
+
+    }
+
+    std::bitset<32> permutedP(const std::bitset<32>& input) {
+        std::bitset<32> output;
+        for (int i = 0; i < 32; i++) {
+            output[i] = input[32 - P_TABLE[i]];
+        }
+        return output;
+    }
+
+    std::bitset<32>
+    feistel(const std::bitset<32>& right, const std::bitset<48>& subkey) {
+        auto expanded = expand(right);
+        auto xored = expanded ^ subkey;
+        auto substituded = substitute(xored);
+        auto permuted = permutedP(substituded);
+
+        return permuted;
+    }
+
+    std:: bitset<64>
+    fPermutation(const std::bitset<64>& input) {
+        std::bitset<64> output;
+        for (int i = 0; i < 64; i++) {
+            output[i] = input[i];
+        }
+        return output;
+    }
+
+    std::bitset<64>
+    encode(const std::bitset<64>& plaintext) {
         auto data = iPermutation(plaintext);
         std::bitset<32> left(data.to_ullong() >> 32);
         std::bitset<32> right(data.to_ullong());
 
+        for (int round = 0; round < 16; round++) {
+            auto newRight = left ^ feistel(right, subkeys[round]);
+            left = right;
+            right = newRight;
+        }
 
+        uint64_t combined = (static_cast<uint64_t>(right.to_ullong()) << 32) | left.to_ullong();
+        return fPermutation(std::bitset<64>(combined));
     }
 
 private:
