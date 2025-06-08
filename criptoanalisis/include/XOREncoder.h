@@ -3,10 +3,6 @@
 
 class XOREncoder {
 public:
-    /**
-     * @brief Constructor.
-     * @param dictionary_filepath Ruta al archivo de diccionario de claves para bruteForceByDictionary.
-     */
     XOREncoder(const std::string& dictionary_filepath = "dictionaries/clavesXOR.txt") :
         dict_filepath_(dictionary_filepath) {
         std::cout << "INFO (XOR): XOREncoder inicializado. Ruta de diccionario: " << dict_filepath_ << std::endl;

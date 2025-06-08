@@ -5,12 +5,17 @@ class
     DES {
 public:
     DES() = default;
-    DES(const std::bitset<64>& key) : key(key) {
+
+    DES(const std::bitset<64>& key) :
+        key(key) {
         generateSubkeys();
     }
 
     ~DES() = default;
 
+    /**
+     * @brief Genera las subclaves necesarias para el cifrado/descifrado DES.
+     */
     void generateSubkeys() {
         for (int i = 0; i < 16; ++i) {
             std::bitset<48> subkey((key.to_ullong() >> 1) & 0xFFFFFFFFFFFF);
@@ -18,6 +23,11 @@ public:
         }
     }
 
+    /**
+     * @brief Realiza la permutación inicial en un bloque de 64 bits.
+     * @param input El bloque de 64 bits de entrada.
+     * @return El bloque de 64 bits permutado.
+     */
     std::bitset<64>
     iPermutation(const std::bitset<64>& input) {
         std::bitset<64> output;
@@ -27,6 +37,11 @@ public:
         return output;
     }
 
+    /**
+     * @brief Expande un semibloque de 32 bits a 48 bits.
+     * @param halfBlock El semibloque de 32 bits.
+     * @return El bloque expandido de 48 bits.
+     */
     std::bitset<48>
     expand(const std::bitset<32>& halfBlock) {
         std::bitset<48> output;
@@ -36,6 +51,11 @@ public:
         return output;
     }
 
+    /**
+     * @brief Realiza la sustitución utilizando las S-Boxes.
+     * @param input El bloque de 48 bits de entrada.
+     * @return El bloque de 32 bits resultante de la sustitución.
+     */
     std::bitset<32>
     substitute(const std::bitset<48>& input) {
         std::bitset<32> output;
@@ -53,7 +73,13 @@ public:
 
     }
 
-    std::bitset<32> permutedP(const std::bitset<32>& input) {
+    /**
+     * @brief Realiza la permutación P sobre un bloque de 32 bits.
+     * @param input El bloque de 32 bits de entrada.
+     * @return El bloque de 32 bits permutado.
+     */
+    std::bitset<32>
+    permutedP(const std::bitset<32>& input) {
         std::bitset<32> output;
         for (int i = 0; i < 32; i++) {
             output[i] = input[32 - P_TABLE[i]];
@@ -61,6 +87,12 @@ public:
         return output;
     }
 
+    /**
+     * @brief Aplica la función de Feistel.
+     * @param right El semibloque derecho de 32 bits.
+     * @param subkey La subclave de 48 bits para la ronda actual.
+     * @return El resultado de 32 bits de la función de Feistel.
+     */
     std::bitset<32>
     feistel(const std::bitset<32>& right, const std::bitset<48>& subkey) {
         auto expanded = expand(right);
@@ -71,7 +103,12 @@ public:
         return permuted;
     }
 
-    std:: bitset<64>
+    /**
+     * @brief Realiza la permutación final en un bloque de 64 bits.
+     * @param input El bloque de 64 bits de entrada.
+     * @return El bloque de 64 bits permutado.
+     */
+    std::bitset<64>
     fPermutation(const std::bitset<64>& input) {
         std::bitset<64> output;
         for (int i = 0; i < 64; i++) {
@@ -80,6 +117,11 @@ public:
         return output;
     }
 
+    /**
+     * @brief Codifica un bloque de 64 bits de texto plano usando DES.
+     * @param plaintext El bloque de 64 bits de texto plano.
+     * @return El bloque de 64 bits de texto cifrado.
+     */
     std::bitset<64>
     encode(const std::bitset<64>& plaintext) {
         auto data = iPermutation(plaintext);
@@ -94,6 +136,58 @@ public:
 
         uint64_t combined = (static_cast<uint64_t>(right.to_ullong()) << 32) | left.to_ullong();
         return fPermutation(std::bitset<64>(combined));
+    }
+
+    /**
+     * @brief Decodifica un bloque de 64 bits de texto cifrado usando DES.
+     * @param plaintext El bloque de 64 bits de texto cifrado. // Nota: el parámetro se llama plaintext pero es ciphertext.
+     * @return El bloque de 64 bits de texto decodificado.
+     */
+    std::bitset<64>
+    decode(const std::bitset<64>& plaintext) {
+        auto data = iPermutation(plaintext);
+        std::bitset<32> left(data.to_ullong() >> 32);
+        std::bitset<32> right(data.to_ullong());
+
+        for (int round = 15; round >= 0; --round) {
+            auto newRight = left ^ feistel(right, subkeys[round]);
+            left = right;
+            right = newRight;
+        }
+
+        uint64_t combined = (static_cast<uint64_t>(right.to_ullong()) << 32) | left.to_ullong();
+        return fPermutation(std::bitset<64>(combined));
+    }
+
+    /**
+     * @brief Convierte un string (bloque de 8 caracteres) a un bitset de 64 bits.
+     * @param block El string de entrada (se esperan 8 caracteres).
+     * @return El bitset de 64 bits correspondiente.
+     */
+    std::bitset<64>
+    stringToBitset64(const std::string& block) {
+        uint64_t bits = 0;
+        for (int i = 0; i < block.size(); i++) {
+            bits |= (uint64_t)(unsigned char)block[i] << ((7 - i) * 8);
+        }
+        return std::bitset<64>(bits);
+    }
+
+    /**
+     * @brief Convierte un bitset de 64 bits a un string (bloque de 8 caracteres).
+     * @param bits El bitset de 64 bits de entrada.
+     * @return El string de 8 caracteres correspondiente.
+     */
+    std::string
+    bitset64ToString(const std::bitset<64>& bits) {
+        std::string result(8, '\0');
+        uint64_t val = bits.to_ullong();
+
+        for (int i = 0; i < 8; i++) {
+            result[7 - i] = (val >> (i * 8)) & 0xFF;
+        }
+
+        return result;
     }
 
 private:

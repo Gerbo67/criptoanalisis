@@ -4,10 +4,10 @@
 struct EvaluationResult {
     std::string text;
     double congruence_score;
-    std::string identifier; // Para almacenar información como la clave original
+    std::string identifier;
 
     bool operator<(const EvaluationResult& other) const {
-        return congruence_score > other.congruence_score; // Orden descendente por score
+        return congruence_score > other.congruence_score;
     }
 };
 

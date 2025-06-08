@@ -7,6 +7,11 @@ public:
     AsciiBinary() = default;
     ~AsciiBinary() = default;
 
+    /**
+     * @brief Convierte un carácter a su representación binaria de 8 bits.
+     * @param c El carácter a convertir.
+     * @return Un string representando el carácter en binario.
+     */
     std::string
     bitset(char c)
     {
@@ -20,6 +25,12 @@ public:
         return result;
     }
 
+    /**
+     * @brief Convierte un string de caracteres a su representación binaria.
+     * Cada carácter se convierte a binario de 8 bits, separados por espacios.
+     * @param input El string de entrada.
+     * @return Un string con la representación binaria del string de entrada.
+     */
     std::string
     stringToBinary(const std::string& input) {
         std::ostringstream oss;
@@ -37,6 +48,11 @@ public:
         return output;
     }
 
+    /**
+     * @brief Convierte un string de binario (8 bits) a un carácter.
+     * @param binary El string binario (debe tener 8 bits).
+     * @return El carácter correspondiente.
+     */
     char binaryToChar(const std:: string& binary)
     {
         int value = 0;
@@ -48,6 +64,11 @@ public:
         return static_cast<char>(value);
     }
 
+    /**
+     * @brief Convierte un string de representaciones binarias (separadas por espacios) a un string de caracteres.
+     * @param binaryInput El string de entrada con valores binarios.
+     * @return El string de caracteres decodificado.
+     */
     std::string
     binaryToString(const std::string& binaryInput)
     {
@@ -65,4 +86,3 @@ public:
     }
 private:
 };
-
